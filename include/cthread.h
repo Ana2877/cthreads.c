@@ -1,10 +1,10 @@
 /*
- * cthread.h: arquivo de inclus„o com os protÛtipos das funÁıes a serem
- *            implementadas na realizaÁ„o do trabalho.
+ * cthread.h: arquivo de inclus√£o com os prot√≥tipos das fun√ß√µes a serem
+ *            implementadas na realiza√ß√£o do trabalho.
  *
- * N√O MODIFIQUE ESTE ARQUIVO.
+ * N√ÉO MODIFIQUE ESTE ARQUIVO.
  *
- * VERS√O: 29/03/2019
+ * VERS√ÉO: 29/03/2019
  *
  */
 #ifndef __cthread__
@@ -12,89 +12,88 @@
 
 #include "support.h"
 
-typedef struct s_sem {
-	int	count;	/* indica se recurso est· ocupado ou n„o (livre > 0, ocupado = 0) */
-	PFILA2	fila; 	/* ponteiro para uma fila de threads bloqueadas no sem·foro */
+typedef struct s_sem
+{
+	int count;   /* indica se recurso est√° ocupado ou n√£o (livre > 0, ocupado = 0) */
+	PFILA2 fila; /* ponteiro para uma fila de threads bloqueadas no sem√°foro */
 } csem_t;
 
 /******************************************************************************
-Par‚metros:
-	start:	ponteiro para a funÁ„o que a thread executar·.
-	arg:	um par‚metro que pode ser passado para a thread na sua criaÁ„o.
-	prio:	N√O utilizado neste semestre, deve ser sempre zero.
+Par√¢metros:
+	start:	ponteiro para a fun√ß√£o que a thread executar√°.
+	arg:	um par√¢metro que pode ser passado para a thread na sua cria√ß√£o.
+	prio:	N√ÉO utilizado neste semestre, deve ser sempre zero.
 Retorno:
 	Se correto => Valor positivo, que representa o identificador da thread criada
 	Se erro	   => Valor negativo.
 ******************************************************************************/
-int ccreate (void* (*start)(void*), void *arg, int prio);
+int ccreate(void *(*start)(void *), void *arg, int prio);
 
 /******************************************************************************
-Par‚metros:
-	Sem par‚metros
+Par√¢metros:
+	Sem par√¢metros
 Retorno:
 	Quando executada corretamente: retorna 0 (zero)
-	Caso contr·rio, retorna um valor negativo.
+	Caso contr√°rio, retorna um valor negativo.
 ******************************************************************************/
 int cyield(void);
 
 /******************************************************************************
-Par‚metros:
-	tid: identificador da thread cuja prioridade ser· alterada (deixar sempre esse campo como NULL em 2018/02)
+ParÔøΩmetros:
+	tid: identificador da thread cuja prioridade serÔøΩ alterada (deixar sempre esse campo como NULL em 2018/02)
 	prio: nova prioridade da thread.
 Retorno:
 	Quando executada corretamente: retorna 0 (zero)
-	Caso contr·rio, retorna um valor negativo.
+	Caso contr√°rio, retorna um valor negativo.
 ******************************************************************************/
 int csetprio(int tid, int prio);
 
 /******************************************************************************
-Par‚metros:
-	tid:	identificador da thread cujo tÈrmino est· sendo aguardado.
+Par√¢metros:
+	tid:	identificador da thread cujo t√©rmino est√° sendo aguardado.
 Retorno:
 	Quando executada corretamente: retorna 0 (zero)
-	Caso contr·rio, retorna um valor negativo.
+	Caso contr√°rio, retorna um valor negativo.
 ******************************************************************************/
 int cjoin(int tid);
 
 /******************************************************************************
-Par‚metros:
-	sem:	ponteiro para uma vari·vel do tipo csem_t. Aponta para uma estrutura de dados que representa a vari·vel sem·foro.
-	count: valor a ser usado na inicializaÁ„o do sem·foro. Representa a quantidade de recursos controlados pelo sem·foro.
+Par√¢metros:
+	sem:	ponteiro para uma vari√°vel do tipo csem_t. Aponta para uma estrutura de dados que representa a vari√°vel sem√°foro.
+	count: valor a ser usado na inicializa√ß√£o do sem√°foro. Representa a quantidade de recursos controlados pelo sem√°foro.
 Retorno:
 	Quando executada corretamente: retorna 0 (zero)
-	Caso contr·rio, retorna um valor negativo.
+	Caso contr√°rio, retorna um valor negativo.
 ******************************************************************************/
 int csem_init(csem_t *sem, int count);
 
 /******************************************************************************
-Par‚metros:
-	sem:	ponteiro para uma vari·vel do tipo sem·foro.
+Par√¢metros:
+	sem:	ponteiro para uma vari√°vel do tipo sem√°foro.
 Retorno:
 	Quando executada corretamente: retorna 0 (zero)
-	Caso contr·rio, retorna um valor negativo.
+	Caso contr√°rio, retorna um valor negativo.
 ******************************************************************************/
 int cwait(csem_t *sem);
 
 /******************************************************************************
-Par‚metros:
-	sem:	ponteiro para uma vari·vel do tipo sem·foro.
+Par√¢metros:
+	sem:	ponteiro para uma vari√°vel do tipo sem√°foro.
 Retorno:
 	Quando executada corretamente: retorna 0 (zero)
-	Caso contr·rio, retorna um valor negativo.
+	Caso contr√°rio, retorna um valor negativo.
 ******************************************************************************/
 int csignal(csem_t *sem);
 
 /******************************************************************************
-Par‚metros:
-	name:	ponteiro para uma ·rea de memÛria onde deve ser escrito um string que contÈm os nomes dos componentes do grupo e seus n˙meros de cart„o.
+Par√¢metros:
+	name:	ponteiro para uma √°rea de mem√≥ria onde deve ser escrito um string que cont√©m os nomes dos componentes do grupo e seus n√∫meros de cart√£o.
 		Deve ser uma linha por componente.
-	size:	quantidade m·xima de caracteres que podem ser copiados para o string de identificaÁ„o dos componentes do grupo.
+	size:	quantidade m√°xima de caracteres que podem ser copiados para o string de identifica√ß√£o dos componentes do grupo.
 Retorno:
 	Quando executada corretamente: retorna 0 (zero)
-	Caso contr·rio, retorna um valor negativo.
+	Caso contr√°rio, retorna um valor negativo.
 ******************************************************************************/
-int cidentify (char *name, int size);
-
+int cidentify(char *name, int size);
 
 #endif
-

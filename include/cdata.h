@@ -1,7 +1,7 @@
 /*
- * cdata.h: arquivo de inclus„o de uso apenas na geraÁ„o da libpithread
+ * cdata.h: arquivo de inclus√£o de uso apenas na gera√ß√£o da libpithread
  *
- * VERS√O: 29/03/2019
+ * VERS√ÉO: 29/03/2019
  *
  */
 #ifndef __cdata__
@@ -10,24 +10,23 @@
 
 /* Estados das threads
 */
-#define	PROCST_APTO	0		/* Processo em estado apto a ser escalonado */
-#define	PROCST_EXEC	1		/* Processo em estado de execuÁ„o */
-#define	PROCST_BLOQ	2		/* Processo em estado bloqueado */
-#define	PROCST_TERMINO	3	/* Processo em estado de terminado */
+#define PROCST_APTO 0	/* Processo em estado apto a ser escalonado */
+#define PROCST_EXEC 1	/* Processo em estado de execu√ß√£o */
+#define PROCST_BLOQ 2	/* Processo em estado bloqueado */
+#define PROCST_TERMINO 3 /* Processo em estado de terminado */
 
-
-typedef struct s_TCB { 
-	/* OS CAMPOS ABAIXO N√O PODEM SER ALTERADOS OU REMOVIDOS
+typedef struct s_TCB
+{
+	/* OS CAMPOS ABAIXO N√ÇO PODEM SER ALTERADOS OU REMOVIDOS
 	*/
-	int		tid; 		// identificador da thread
-	int		state;		// estado em que a thread se encontra (CONFORME DEFINES ANTERIORES)
-	int 		prio;		// Prioridade associada a thread
-	ucontext_t 	context;	// contexto de execuÁ„o da thread (SP, PC, GPRs e recursos) 
-	
-	/* A PARTIR DESSE PONTO PODEM SER ACRESCENTADOS CAMPOS NECESS¡RIOS AO DESENVOLVIMENTO DA BIBLIOTECA
-	*/
-	
-} TCB_t; 
+	int tid;			// identificador da thread
+	int state;			// estado em que a thread se encontra (CONFORME DEFINES ANTERIORES)
+	int prio;			// Prioridade associada a thread
+	ucontext_t context; // contexto de execu√ß√£o da thread (SP, PC, GPRs e recursos)
 
+	/* A PARTIR DESSE PONTO PODEM SER ACRESCENTADOS CAMPOS NECESS√ÅRIOS AO DESENVOLVIMENTO DA BIBLIOTECA
+	*/
+
+} TCB_t;
 
 #endif

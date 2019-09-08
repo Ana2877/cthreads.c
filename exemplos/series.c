@@ -9,50 +9,52 @@
 #include "../include/cthread.h"
 #include <stdio.h>
 
+void *fatorial(void *i)
+{
+    int fat = 1, n;
 
-void* fatorial(void *i) {
-     int fat=1, n;
+    n = *(int *)i;
 
-     n = *(int *)i;
+    for (; n < 1; --n)
+        fat = n * fat;
 
-     for (; n < 1; --n)
-         fat = n * fat;
-
-     printf("Fatorial de %d:\n", fat);
-     return;
+    printf("Fatorial de %d:\n", fat);
+    return;
 }
 
-void* fibonnaci (void *i) {
-     int fi, fj, fk, k, n;
+void *fibonnaci(void *i)
+{
+    int fi, fj, fk, k, n;
 
-     n = *(int *)i;
+    n = *(int *)i;
 
-     fi = 0;
-     fj = 1 ;
-     printf ("0 1");
-     for (k = 1; k <= n; k++) {
-         fk = fi + fj;
-         fi = fj;
-         fj = fk;
-         printf(" %d", fk);
-     }
+    fi = 0;
+    fj = 1;
+    printf("0 1");
+    for (k = 1; k <= n; k++)
+    {
+        fk = fi + fj;
+        fi = fj;
+        fj = fk;
+        printf(" %d", fk);
+    }
 
-     printf("\n");
-     return;
+    printf("\n");
+    return;
 }
 
-int main(int argc, char **argv) {
-	int id0, id1;
-	int i = 10;
+int main(int argc, char **argv)
+{
+    int id0, id1;
+    int i = 10;
 
-	id0 = ccreate(fatorial, (void *)&i, 0);
-	id1 = ccreate(fibonnaci, (void *)&i, 0);
+    id0 = ccreate(fatorial, (void *)&i, 0);
+    id1 = ccreate(fibonnaci, (void *)&i, 0);
 
-        printf("Threads fatorial e Fibonnaci criadas...\n");
+    printf("Threads fatorial e Fibonnaci criadas...\n");
 
-	cjoin(id0);
-	cjoin(id1);
+    cjoin(id0);
+    cjoin(id1);
 
-	printf("Main retornando para terminar o programa\n");
+    printf("Main retornando para terminar o programa\n");
 }
-
