@@ -1,0 +1,7 @@
+# Ignore object files, but allow support.o
+bin/*.o
+!bin/support.o
+
+# Ignore .exe or .out files
+bin/*.exe
+bin/*.out
