@@ -5,3 +5,6 @@ bin/*.o
 # Ignore .exe or .out files
 bin/*.exe
 bin/*.out
+
+# Ignore vscode files
+.vscode/
