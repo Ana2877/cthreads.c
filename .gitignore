@@ -6,5 +6,8 @@ bin/*.o
 bin/*.exe
 bin/*.out
 
+# Ignore .a files
+lib/*.a
+
 # Ignore vscode files
 .vscode/
