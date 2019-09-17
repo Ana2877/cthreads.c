@@ -33,7 +33,10 @@ $(BIN_DIR)/priority_queue.o: $(SRC_DIR)/priority_queue.c
 
 .PHONY: clean
 
+# Delete files from lib_dir, temporary files and all bin_dir files 
+# except support.o
 clean:
-	rm -rf $(LIB_DIR)/*.a $(BIN_DIR)/cthread.o $(SRC_DIR)/*~ $(INC_DIR)/*~ *~ 
+	rm -rf $(LIB_DIR)/*.a $(SRC_DIR)/*~ $(INC_DIR)/*~ *~
+	find $(BIN_DIR) -type f -not -name 'support.o' -delete 
 
 
