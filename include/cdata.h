@@ -19,10 +19,10 @@ typedef struct s_TCB
 {
 	/* OS CAMPOS ABAIXO NÂO PODEM SER ALTERADOS OU REMOVIDOS
 	*/
-	int tid;			// identificador da thread
-	int state;			// estado em que a thread se encontra (CONFORME DEFINES ANTERIORES)
-	int prio;			// Prioridade associada a thread
-	ucontext_t context; // contexto de execução da thread (SP, PC, GPRs e recursos)
+	int tid;			/* identificador da thread */
+	int state;			/* estado em que a thread se encontra (CONFORME DEFINES ANTERIORES) */
+	int prio;			/* Prioridade associada a thread */
+	ucontext_t context; /* contexto de execução da thread (SP, PC, GPRs e recursos) */
 
 	/* A PARTIR DESSE PONTO PODEM SER ACRESCENTADOS CAMPOS NECESSÁRIOS AO DESENVOLVIMENTO DA BIBLIOTECA
 	*/

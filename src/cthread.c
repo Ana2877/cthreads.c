@@ -3,6 +3,7 @@
 #include "../include/support.h"
 #include "../include/cthread.h"
 #include "../include/cdata.h"
+#include "../include/priority_queue.h"
 
 int ccreate(void *(*start)(void *), void *arg, int prio)
 {
