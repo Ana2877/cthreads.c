@@ -128,5 +128,13 @@ void initialize_cthread()
 /* Scheduler */
 void scheduler()
 {
+	/* Store scheduler context globally */
+	getcontext(scheduler_context);
+
+	/* Loop infinitely scheduling the threads */
+	while (1)
+	{
+	}
+
 	return;
 }
