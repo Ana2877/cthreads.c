@@ -18,20 +18,20 @@ int main()
 
     PriorityQueue *pq = createPriorityQueue();
     printf("Created pq\n");
-    insertPriorityQueue(pq, (void *)TCB[0]);
     insertPriorityQueue(pq, (void *)TCB[1]);
     insertPriorityQueue(pq, (void *)TCB[TCB_SIZE - 1]);
     insertPriorityQueue(pq, (void *)TCB[2]);
+    insertPriorityQueue(pq, (void *)TCB[0]);
     insertPriorityQueue(pq, (void *)TCB[3]);
 
-    /* Must print TCB_SIZE - 1 */
+    /* Must print 0 */
     TCB_t *returned = (TCB_t *)frontPriorityQueue(pq);
-    printf("%d == %d \n", returned->prio, TCB_SIZE - 1);
+    printf("%d == 0\n", returned->prio);
 
-    /* Must print 3 */
+    /* Must print 1 */
     popPriorityQueue(pq);
     returned = (TCB_t *)frontPriorityQueue(pq);
-    printf("%d == 3\n", returned->prio);
+    printf("%d == 1\n", returned->prio);
 
     /* Must equal NULL */
     popPriorityQueue(pq);

@@ -51,8 +51,9 @@ void insertPriorityQueue(PriorityQueue *pq, void *content)
         TCB_t *node = (TCB_t *)GetAtIteratorFila2((PFILA2)pq);
         printf("Current at node with prio %d\n", node->prio);
 
-        /* We will use a descending priority order */
-        if (node->prio >= current_node->prio)
+        /* We will use a descending priority order, where the lower
+           the value, the higher the node priority */
+        if (node->prio <= current_node->prio)
             NextFila2((PFILA2)pq);
         else
             break;
