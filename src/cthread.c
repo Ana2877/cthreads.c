@@ -119,7 +119,15 @@ void initialize_cthread()
 	running = main_TCB;
 	ready = createPriorityQueue();
 	blocked = createPriorityQueue();
+
+	/* Configure scheduler_context (with utc_link pointing to itself - infinite loop) */
 	scheduler_context = (ucontext_t *)malloc(sizeof(ucontext_t));
+	getcontext(scheduler_context);
+	scheduler_context->uc_link = scheduler_context;
+	scheduler_context->uc_stack.ss_sp = malloc(STACK_SIZE);
+	scheduler_context->uc_stack.ss_size = STACK_SIZE;
+	scheduler_context->uc_stack.ss_flags = 0;
+	makecontext(scheduler_context, scheduler, 1, NULL);
 
 	/* Start counting the time for the main thread */
 	startTimer();
@@ -128,13 +136,5 @@ void initialize_cthread()
 /* Scheduler */
 void scheduler()
 {
-	/* Store scheduler context globally */
-	getcontext(scheduler_context);
-
-	/* Loop infinitely scheduling the threads */
-	while (1)
-	{
-	}
-
 	return;
 }
