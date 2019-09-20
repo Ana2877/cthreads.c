@@ -16,7 +16,6 @@ PriorityQueue *ready = NULL;
 PriorityQueue *blocked = NULL;
 ucontext_t *scheduler_context = NULL;
 int global_tid = FIRST_TID;
-int is_yield = FALSE, is_join = FALSE;
 
 /* Prototypes to auxiliar functions */
 void initialize_cthread();
