@@ -5,7 +5,7 @@
 CC=gcc
 LIB_DIR=../lib
 
-all: priority_queue ccreate cyield
+all: priority_queue ccreate cyield cjoin
 
 
 priority_queue: priority_queue_test.c 
@@ -17,8 +17,11 @@ ccreate: ccreate_test.c
 cyield: cyield_test.c
 	$(CC) -o cyield_test cyield_test.c -Wall -L$(LIB_DIR) -lcthread -Wall
 
+cjoin: cjoin_test.c
+	$(CC) -o cjoin_test cjoin_test.c -Wall -L$(LIB_DIR) -lcthread -Wall
+
 clean:
-	rm -rf priority_queue_test ccreate_test cyield_test *.o *~
+	rm -rf priority_queue_test ccreate_test cyield_test cjoin_test *.o *~
 
 
 

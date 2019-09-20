@@ -27,6 +27,8 @@ typedef struct s_TCB
 	/* A PARTIR DESSE PONTO PODEM SER ACRESCENTADOS CAMPOS NECESSÁRIOS AO DESENVOLVIMENTO DA BIBLIOTECA
 	*/
 
+	struct s_TCB *waited_by; /* TCB da thread que está aguardando essa thread finalizar */
+
 } TCB_t;
 
 #endif

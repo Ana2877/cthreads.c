@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "../include/support.h"
 #include "../include/cthread.h"
 #include "../include/cdata.h"
@@ -14,7 +15,7 @@ TCB_t *running = NULL;
 PriorityQueue *ready = NULL;
 PriorityQueue *blocked = NULL;
 ucontext_t *scheduler_context = NULL;
-int tid = FIRST_TID;
+int global_tid = FIRST_TID;
 
 /* Prototypes to auxiliar functions */
 void initialize_cthread();
@@ -32,7 +33,8 @@ int ccreate(void *(*start)(void *), void *arg, int prio)
 	new_thread = (TCB_t *)malloc(sizeof(TCB_t));
 	new_thread->state = PROCST_APTO;
 	new_thread->prio = 0;
-	new_thread->tid = tid++;
+	new_thread->tid = global_tid++;
+	printf("[DEBUG] Created new thread with TID %d\n", new_thread->tid);
 
 	/* Initialize context of it */
 	if (getcontext(&new_thread->context) == -1)
@@ -76,11 +78,47 @@ int cyield(void)
 
 int cjoin(int tid)
 {
+	TCB_t *joined_thread, *current_thread;
+
 	/* Initialize cthread library if not initialized yet */
 	if (running == NULL)
 		initialize_cthread();
 
-	return -9;
+	current_thread = running;
+	joined_thread = (TCB_t *)findPriorityQueue(ready, tid);
+
+	/* If it is trying to wait for main, we return an error */
+	if (tid == FIRST_TID)
+		return -1;
+
+	/* If this thread doesn't exist, we return an error */
+	if (joined_thread == NULL)
+		return -1;
+
+	/* If there is already somebody waiting for this, we return an error */
+	if (joined_thread->waited_by != NULL)
+		return -1;
+
+	/* Update waited_thread to mark current_thread as waiting for it */
+	printf("[DEBUG] Thread tid %d is waited by thread tid %d\n", tid, current_thread->tid);
+	joined_thread->waited_by = current_thread;
+
+	/* Update current_thread status to blocked, and add it to their list */
+	current_thread->state = PROCST_BLOQ;
+	current_thread->prio = stopTimer();
+	insertPriorityQueue(blocked, current_thread);
+
+	/* Remove current running thread */
+	running = NULL;
+
+	/* Restart timer for next thread */
+	startTimer();
+
+	/* Swap context to the scheduler decide who runs */
+	printf("[DEBUG] Swapping to scheduler!\n");
+	swapcontext(&(current_thread->context), scheduler_context);
+
+	return 0;
 }
 
 int csem_init(csem_t *sem, int count)
@@ -129,7 +167,8 @@ void initialize_cthread()
 	TCB_t *main_TCB = (TCB_t *)malloc(sizeof(TCB_t));
 	main_TCB->state = PROCST_EXEC;
 	main_TCB->prio = 0;
-	main_TCB->tid = tid++;
+	main_TCB->tid = global_tid++;
+	printf("[DEBUG] Created main thread with TID %d\n", main_TCB->tid);
 
 	/* Configure the global variables */
 	running = main_TCB;
