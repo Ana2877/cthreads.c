@@ -16,7 +16,7 @@ INC_DIR=./include
 BIN_DIR=./bin
 SRC_DIR=./src
 
-CFLAGS= -Wall -Wextra -O2 -Wunreachable-code -Wuninitialized -Winit-self -pedantic
+CFLAGS= -Wall -Wextra -O2 -Wunreachable-code -Wuninitialized -Winit-self -std=gnu99
 ARFLAGS= -rv
 
 
