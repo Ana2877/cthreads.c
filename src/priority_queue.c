@@ -35,12 +35,10 @@ void popPriorityQueue(PriorityQueue *pq)
 void insertPriorityQueue(PriorityQueue *pq, void *content)
 {
     TCB_t *current_node = (TCB_t *)content;
-    printf("Trying to add node with prio %d\n", current_node->prio);
-
+    
     /* If pq is empty, we append it to the end */
     if (FirstFila2(pq) != 0)
     {
-        printf("[DEBUG] PQ empty, we must add at the end\n");
         AppendFila2((PFILA2)pq, content);
         return;
     }
@@ -49,7 +47,6 @@ void insertPriorityQueue(PriorityQueue *pq, void *content)
     while (GetAtIteratorFila2(pq) != NULL)
     {
         TCB_t *node = (TCB_t *)GetAtIteratorFila2((PFILA2)pq);
-        printf("Current at node with prio %d\n", node->prio);
 
         /* We will use a descending priority order, where the lower
            the value, the higher the node priority */
@@ -61,15 +58,9 @@ void insertPriorityQueue(PriorityQueue *pq, void *content)
 
     /* If we have an iterator, we append before it, else we append at the end of the queue */
     if (GetAtIteratorFila2((PFILA2)pq) != NULL)
-    {
-        printf("[DEBUG] Pq not empty, added before an iterator with prio %d\n", ((TCB_t *)GetAtIteratorFila2(pq))->prio);
         InsertBeforeIteratorFila2((PFILA2)pq, content);
-    }
     else
-    {
         AppendFila2((PFILA2)pq, content);
-        printf("[DEBUG] Need to add at the end\n");
-    }
 
     return;
 }
@@ -79,16 +70,12 @@ void *findPriorityQueue(PriorityQueue *pq, int value)
 {
     /* If pq is empty, we return NULL */
     if (FirstFila2(pq) != 0)
-    {
-        printf("[DEBUG] PQ empty, we can't find anything on it\n");
         return NULL;
-    }
 
     /* Iterate to find where is the node we are trying to find */
     while (GetAtIteratorFila2(pq) != NULL)
     {
         TCB_t *node = (TCB_t *)GetAtIteratorFila2((PFILA2)pq);
-        printf("Current at node with tid %d\n", node->tid);
 
         /* We will use a descending priority order, where the lower
            the value, the higher the node priority */
@@ -98,35 +85,22 @@ void *findPriorityQueue(PriorityQueue *pq, int value)
             break;
     }
 
-    /* If we have an iterator, we can return it, else we return NULL */
-    if (GetAtIteratorFila2((PFILA2)pq) != NULL)
-    {
-        printf("[DEBUG] Found the value on the list\n");
-        return GetAtIteratorFila2((PFILA2)pq);
-    }
-    else
-    {
-        printf("[DEBUG] Didn't found value\n");
-        return NULL;
-    }
+    /* If we have an iterator, we can return it, else we return NULL (already handled by the underlying function) */
+    return GetAtIteratorFila2((PFILA2)pq);
 }
 
 /* Procura na lista um TCB cujo TID seja o valor passado,
    e remove essa entrada da PriorityQueue */
 int removePriorityQueue(PriorityQueue *pq, int value)
 {
-    /* If pq is empty, we return NULL */
+    /* If pq is empty, we return an error */
     if (FirstFila2(pq) != 0)
-    {
-        printf("[DEBUG] PQ empty, we can't find anything on it\n");
         return -1;
-    }
 
     /* Iterate to find where is the node we are trying to find */
     while (GetAtIteratorFila2(pq) != NULL)
     {
         TCB_t *node = (TCB_t *)GetAtIteratorFila2((PFILA2)pq);
-        printf("Current at node with tid %d\n", node->tid);
 
         /* We will use a descending priority order, where the lower
            the value, the higher the node priority */
@@ -139,13 +113,9 @@ int removePriorityQueue(PriorityQueue *pq, int value)
     /* If we have an iterator, we can delete it, else we return -1 as error */
     if (GetAtIteratorFila2((PFILA2)pq) != NULL)
     {
-        printf("[DEBUG] Found the value on the list, deleting it\n");
         DeleteAtIteratorFila2((PFILA2)pq);
         return 0;
     }
     else
-    {
-        printf("[DEBUG] Didn't found value\n");
         return -1;
-    }
 }
