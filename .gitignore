@@ -11,3 +11,6 @@ lib/*.a
 
 # Ignore vscode files
 .vscode/
+
+# Ignore log files
+*.log
