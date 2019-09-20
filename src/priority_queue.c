@@ -73,3 +73,79 @@ void insertPriorityQueue(PriorityQueue *pq, void *content)
 
     return;
 }
+
+/* Procura na lista um TCB cujo TID seja o valor passado */
+void *findPriorityQueue(PriorityQueue *pq, int value)
+{
+    /* If pq is empty, we return NULL */
+    if (FirstFila2(pq) != 0)
+    {
+        printf("[DEBUG] PQ empty, we can't find anything on it\n");
+        return NULL;
+    }
+
+    /* Iterate to find where is the node we are trying to find */
+    while (GetAtIteratorFila2(pq) != NULL)
+    {
+        TCB_t *node = (TCB_t *)GetAtIteratorFila2((PFILA2)pq);
+        printf("Current at node with tid %d\n", node->tid);
+
+        /* We will use a descending priority order, where the lower
+           the value, the higher the node priority */
+        if (node->tid != value)
+            NextFila2((PFILA2)pq);
+        else
+            break;
+    }
+
+    /* If we have an iterator, we can return it, else we return NULL */
+    if (GetAtIteratorFila2((PFILA2)pq) != NULL)
+    {
+        printf("[DEBUG] Found the value on the list\n");
+        return GetAtIteratorFila2((PFILA2)pq);
+    }
+    else
+    {
+        printf("[DEBUG] Didn't found value\n");
+        return NULL;
+    }
+}
+
+/* Procura na lista um TCB cujo TID seja o valor passado,
+   e remove essa entrada da PriorityQueue */
+int removePriorityQueue(PriorityQueue *pq, int value)
+{
+    /* If pq is empty, we return NULL */
+    if (FirstFila2(pq) != 0)
+    {
+        printf("[DEBUG] PQ empty, we can't find anything on it\n");
+        return -1;
+    }
+
+    /* Iterate to find where is the node we are trying to find */
+    while (GetAtIteratorFila2(pq) != NULL)
+    {
+        TCB_t *node = (TCB_t *)GetAtIteratorFila2((PFILA2)pq);
+        printf("Current at node with tid %d\n", node->tid);
+
+        /* We will use a descending priority order, where the lower
+           the value, the higher the node priority */
+        if (node->tid != value)
+            NextFila2((PFILA2)pq);
+        else
+            break;
+    }
+
+    /* If we have an iterator, we can delete it, else we return -1 as error */
+    if (GetAtIteratorFila2((PFILA2)pq) != NULL)
+    {
+        printf("[DEBUG] Found the value on the list, deleting it\n");
+        DeleteAtIteratorFila2((PFILA2)pq);
+        return 0;
+    }
+    else
+    {
+        printf("[DEBUG] Didn't found value\n");
+        return -1;
+    }
+}

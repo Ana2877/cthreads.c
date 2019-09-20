@@ -16,10 +16,12 @@ PriorityQueue *ready = NULL;
 PriorityQueue *blocked = NULL;
 ucontext_t *scheduler_context = NULL;
 int global_tid = FIRST_TID;
+int is_yield = FALSE, is_join = FALSE;
 
 /* Prototypes to auxiliar functions */
 void initialize_cthread();
 void scheduler();
+void wakeUp(int);
 
 int ccreate(void *(*start)(void *), void *arg, int prio)
 {
@@ -191,5 +193,60 @@ void initialize_cthread()
 /* Scheduler */
 void scheduler()
 {
-	printf("Reached scheduler!\n");
+	TCB_t *scheduled;
+	printf("[DEBUG] Current running %p\n", (void *)running);
+
+	/* If running is not null, this means the thread it was there just finished */
+	if (running != NULL)
+	{
+		printf("[DEBUG] Thread tid %d just finished, waking up its children (if exists)...\n", running->tid);
+		if (running->waited_by != NULL)
+			wakeUp(running->waited_by->tid);
+
+		/* Free memory, as it already finished */
+		free(running);
+
+		/* Clean the space for running, to schedule new value */
+		running = NULL;
+	}
+
+	printf("[DEBUG] Reached scheduler!\n");
+	scheduled = frontPriorityQueue(ready);
+	if (scheduled == NULL)
+	{
+		printf("[ERROR] There is no thread to be scheduled\n");
+		exit(1);
+	}
+
+	/* Remove the entry from the priority queue */
+	popPriorityQueue(ready);
+
+	/* Update state */
+	scheduled->state = PROCST_EXEC;
+
+	/* Update running */
+	running = scheduled;
+
+	/* Change context to the scheduled thread */
+	printf("[DEBUG] Starting to run thread tid %d\n", running->tid);
+	setcontext(&(scheduled->context));
+}
+
+/* Remove the tid with this value from the blocked list, and add it to the ready one */
+void wakeUp(int tid)
+{
+	TCB_t *unblocked;
+
+	printf("[DEBUG] Trying to wake up thread %d\n", tid);
+	unblocked = (TCB_t *)findPriorityQueue(blocked, tid);
+	removePriorityQueue(blocked, tid);
+
+	/* If it was a valid thread to be unblocked, we add it to the ready ones */
+	if (unblocked != NULL)
+	{
+		printf("[DEBUG] Waking up thread tid %d\n", tid);
+		insertPriorityQueue(ready, (void *)unblocked);
+	}
+
+	return;
 }

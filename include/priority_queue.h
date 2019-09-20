@@ -41,4 +41,20 @@ Função:	Coloca o ponteiro "content" na posição correta na PriorityQueue,
 -------------------------------------------------------------------*/
 void insertPriorityQueue(PriorityQueue *pq, void *content);
 
+/*-------------------------------------------------------------------
+Função:	Procura na PriorityQueue um TCB cujo TID seja igual
+        ao valor passado como parâmetro
+-------------------------------------------------------------------*/
+void *findPriorityQueue(PriorityQueue *pq, int value);
+
+/* Procura na lista um TCB cujo TID seja o valor passado,
+   e remove essa entrada da PriorityQueue */
+/*-------------------------------------------------------------------
+Função:	Procura na PriorityQueue um TCB cujo TID seja igual
+        ao valor passado como parâmetro, e o remove da lista
+Ret:    -> 0 se consegue deletar o valor
+        -> -1 se não consegue encontrar o valor na lista
+-------------------------------------------------------------------*/
+int removePriorityQueue(PriorityQueue *pq, int value);
+
 #endif
