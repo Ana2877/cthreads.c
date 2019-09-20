@@ -46,7 +46,7 @@ int ccreate(void *(*start)(void *), void *arg, int prio)
 	/* Add it to the Ready Queue */
 	insertPriorityQueue(ready, (void *)new_thread);
 
-	return 0;
+	return new_thread->tid;
 }
 
 int cyield(void)
