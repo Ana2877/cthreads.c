@@ -51,11 +51,27 @@ int ccreate(void *(*start)(void *), void *arg, int prio)
 
 int cyield(void)
 {
+	TCB_t *current_thread;
+
 	/* Initialize cthread library if not initialized yet */
 	if (running == NULL)
 		initialize_cthread();
 
-	return -9;
+	/* Update current_thread status to ready */
+	current_thread = running;
+	current_thread->state = PROCST_APTO;
+	current_thread->prio = stopTimer(); /* Time since started running */
+
+	/* Remove current running thread */
+	running = NULL;
+
+	/* Restart timer for next thread */
+	startTimer();
+
+	/* Swap context to the scheduler decide who runs */
+	swapcontext(&(current_thread->context), scheduler_context);
+
+	return 0;
 }
 
 int cjoin(int tid)
@@ -136,5 +152,5 @@ void initialize_cthread()
 /* Scheduler */
 void scheduler()
 {
-	return;
+	printf("Reached scheduler!\n");
 }
