@@ -10,12 +10,26 @@
 #define FIRST_TID 0
 #define STACK_SIZE (2 << 16)
 
+#define DEBUG_ENABLED
+#ifdef DEBUG_ENABLED
+#define DEBUG(s_, ...) fprintf(cthread_file, "[DEBUG] " s_ "\n", ##__VA_ARGS__)
+#define ERROR(s_, ...) fprintf(cthread_file, "[ERROR] " s_ "\n", ##__VA_ARGS__)
+#define CREATE_DEBUG_FILE (cthread_file = fopen("./cthread.log", "a"))
+#else
+#define DEBUG(s_, ...)
+#define ERROR(s_, ...)
+#define CREATE_DEBUG_FILE
+#endif
+
 /* Configure global variables */
 TCB_t *running = NULL;
 PriorityQueue *ready = NULL;
 PriorityQueue *blocked = NULL;
 ucontext_t *scheduler_context = NULL;
 int global_tid = FIRST_TID;
+
+/* Configure DEBUG file */
+FILE *cthread_file;
 
 /* Prototypes to auxiliar functions */
 void initialize_cthread();
@@ -35,11 +49,17 @@ int ccreate(void *(*start)(void *), void *arg, int prio)
 	new_thread->state = PROCST_APTO;
 	new_thread->prio = 0;
 	new_thread->tid = global_tid++;
-	printf("[DEBUG] Created new thread with TID %d\n", new_thread->tid);
+	DEBUG("Created new thread with TID %d", new_thread->tid);
 
 	/* Initialize context of it */
+	DEBUG("Trying to acquire context for new thread");
 	if (getcontext(&new_thread->context) == -1)
+	{
 		return -1;
+		ERROR("Couldn't get thread context...");
+	}
+
+	DEBUG("Acquired thread context successfuly");
 	new_thread->context.uc_link = scheduler_context;
 	new_thread->context.uc_stack.ss_sp = malloc(STACK_SIZE);
 	new_thread->context.uc_stack.ss_size = STACK_SIZE;
@@ -47,8 +67,10 @@ int ccreate(void *(*start)(void *), void *arg, int prio)
 	makecontext(&new_thread->context, (void (*)(void))start, 1, arg);
 
 	/* Add it to the Ready Queue */
+	DEBUG("Inserting thread to ready Queue");
 	insertPriorityQueue(ready, (void *)new_thread);
 
+	DEBUG("Finished creating thread successfully");
 	return new_thread->tid;
 }
 
@@ -64,14 +86,17 @@ int cyield(void)
 	current_thread = running;
 	current_thread->state = PROCST_APTO;
 	current_thread->prio = stopTimer(); /* Time since started running */
+	DEBUG("Moving current running thread with tid %d to ready", current_thread->tid);
 
 	/* Remove current running thread */
 	running = NULL;
 
 	/* Restart timer for next thread */
+	DEBUG("Restarting timer for next thread");
 	startTimer();
 
 	/* Swap context to the scheduler decide who runs */
+	DEBUG("Swapping context to scheduler");
 	swapcontext(&(current_thread->context), scheduler_context);
 
 	return 0;
@@ -85,26 +110,38 @@ int cjoin(int tid)
 	if (running == NULL)
 		initialize_cthread();
 
+	/* Find the thread we want to join */
+	DEBUG("Finding thread to join");
 	current_thread = running;
 	joined_thread = (TCB_t *)findPriorityQueue(ready, tid);
 
 	/* If it is trying to wait for main, we return an error */
 	if (tid == FIRST_TID)
+	{
+		ERROR("Tried to wait for main thread, which is NOT allowed");
 		return -1;
+	}
 
 	/* If this thread doesn't exist, we return an error */
 	if (joined_thread == NULL)
+	{
+		ERROR("Tried to wait for non existant thread");
 		return -1;
+	}
 
 	/* If there is already somebody waiting for this, we return an error */
 	if (joined_thread->waited_by != NULL)
+	{
+		ERROR("Tried to wait for a thread which is already waited by thread tid %d", joined_thread->waited_by->tid);
 		return -1;
+	}
 
 	/* Update waited_thread to mark current_thread as waiting for it */
-	printf("[DEBUG] Thread tid %d is waited by thread tid %d\n", tid, current_thread->tid);
+	DEBUG("Thread tid %d is waited by thread tid %d", tid, current_thread->tid);
 	joined_thread->waited_by = current_thread;
 
 	/* Update current_thread status to blocked, and add it to their list */
+	DEBUG("Blocking current thread, adding it to the blocked queue");
 	current_thread->state = PROCST_BLOQ;
 	current_thread->prio = stopTimer();
 	insertPriorityQueue(blocked, current_thread);
@@ -116,7 +153,7 @@ int cjoin(int tid)
 	startTimer();
 
 	/* Swap context to the scheduler decide who runs */
-	printf("[DEBUG] Swapping to scheduler!\n");
+	DEBUG("Swapping context to scheduler");
 	swapcontext(&(current_thread->context), scheduler_context);
 
 	return 0;
@@ -169,12 +206,14 @@ void initialize_cthread()
 	main_TCB->state = PROCST_EXEC;
 	main_TCB->prio = 0;
 	main_TCB->tid = global_tid++;
-	printf("[DEBUG] Created main thread with TID %d\n", main_TCB->tid);
 
 	/* Configure the global variables */
 	running = main_TCB;
 	ready = createPriorityQueue();
 	blocked = createPriorityQueue();
+	CREATE_DEBUG_FILE;
+	DEBUG("Configured global variables");
+	DEBUG("Created main thread with TID %d", main_TCB->tid); /* Need to debug down here because the debug file is not yet open before of this line */
 
 	/* Configure scheduler_context (with utc_link pointing to itself - infinite loop) */
 	scheduler_context = (ucontext_t *)malloc(sizeof(ucontext_t));
@@ -184,6 +223,7 @@ void initialize_cthread()
 	scheduler_context->uc_stack.ss_size = STACK_SIZE;
 	scheduler_context->uc_stack.ss_flags = 0;
 	makecontext(scheduler_context, scheduler, 1, NULL);
+	DEBUG("Successfully configured scheduler context");
 
 	/* Start counting the time for the main thread */
 	startTimer();
@@ -193,14 +233,18 @@ void initialize_cthread()
 void scheduler()
 {
 	TCB_t *scheduled;
-	printf("[DEBUG] Current running %p\n", (void *)running);
+
+	DEBUG("Reached scheduler");
 
 	/* If running is not null, this means the thread it was there just finished */
 	if (running != NULL)
 	{
-		printf("[DEBUG] Thread tid %d just finished, waking up its children (if exists)...\n", running->tid);
+		DEBUG("Thread tid %d just finished", running->tid);
 		if (running->waited_by != NULL)
+		{
+			DEBUG("Waking up thread tid %d children with tid %d", running->tid, running->waited_by->tid);
 			wakeUp(running->waited_by->tid);
+		}
 
 		/* Free memory, as it already finished */
 		free(running);
@@ -209,11 +253,11 @@ void scheduler()
 		running = NULL;
 	}
 
-	printf("[DEBUG] Reached scheduler!\n");
 	scheduled = frontPriorityQueue(ready);
 	if (scheduled == NULL)
 	{
-		printf("[ERROR] There is no thread to be scheduled\n");
+		ERROR("There is no thread to be scheduled");
+		ERROR("EXITING with status code 1");
 		exit(1);
 	}
 
@@ -227,7 +271,7 @@ void scheduler()
 	running = scheduled;
 
 	/* Change context to the scheduled thread */
-	printf("[DEBUG] Starting to run thread tid %d\n", running->tid);
+	DEBUG("Starting to run scheduled thread tid %d", running->tid);
 	setcontext(&(scheduled->context));
 }
 
@@ -236,15 +280,19 @@ void wakeUp(int tid)
 {
 	TCB_t *unblocked;
 
-	printf("[DEBUG] Trying to wake up thread %d\n", tid);
+	DEBUG("Trying to wake up thread %d", tid);
 	unblocked = (TCB_t *)findPriorityQueue(blocked, tid);
-	removePriorityQueue(blocked, tid);
 
 	/* If it was a valid thread to be unblocked, we add it to the ready ones */
 	if (unblocked != NULL)
 	{
-		printf("[DEBUG] Waking up thread tid %d\n", tid);
+		DEBUG("Waking up thread %d, removing it from blocked and adding to ready", tid);
+		removePriorityQueue(blocked, tid);
 		insertPriorityQueue(ready, (void *)unblocked);
+	}
+	else
+	{
+		ERROR("Thread %d not found", tid);
 	}
 
 	return;
