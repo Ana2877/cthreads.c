@@ -166,18 +166,17 @@ int csem_init(csem_t *sem, int count)
 	if (running == NULL)
 		initialize_cthread();
 
-	DEBUG("Starting sem_queue");
-
+	DEBUG("Starting semaphoreQueue pointer");
 	sFila2 *semaphoreQueue = NULL;
 
+	DEBUG("Trying to create semaphoreQueue");
 	int makeQueue = CreateFila2(semaphoreQueue);
 	if (makeQueue != 0){
-		ERROR("No thread in queue");
+		ERROR("Could not create semaphoreQueue");
 		return -9
 	}
 
 	DEBUG("Starting sem_count and sem_fila");
-
 	sem->count = count;
 	sem->fila = semaphoreQueue;
 
@@ -187,65 +186,59 @@ int csem_init(csem_t *sem, int count)
 int cwait(csem_t *sem)
 {
 	DEBUG("Reached cwait");
-
-	TCB_t *current_thread;
-
 	/* Initialize cthread library if not initialized yet */
 	if (running == NULL)
 		initialize_cthread();
 
+	DEBUG("Assigining current_thread to running thread");
+	TCB_t *current_thread;
 	current_thread = running;
-	DEBUG("Starting cwait | P(s)");
 
+	DEBUG("Starting cwait | P(s)");
 	sem->count--;
 	if (sem->count) < 0 {
 
-		DEBUG("Entering inserting section");
-
-		int queueAppended;
-		queueAppended = AppendFila2(sem->fila, current_thread);
+		DEBUG("Inserting thread in semaphoreQueue");
+		int queueAppended = AppendFila2(sem->fila, current_thread);
 		if (queueAppended != 0){
 			ERROR("No thread in queue");
 			return -9
 		}
 
 		DEBUG("Thread inserted in queue");
+		//SLEEP THREAD (current_thread)
 
-		//SLEEP THREAD
-		}
-
+	}
 	return -9;
 }
 
 int csignal(csem_t *sem)
 {
 	DEBUG("Reached csignal");
-
-	TCB_t *current_thread, *nextThread;
-
 	/* Initialize cthread library if not initialized yet */
 	if (running == NULL)
 		initialize_cthread();
 
+	DEBUG("Assigining current_thread and creating nextThread pointers");
+	TCB_t *current_thread, *nextThread;
 	current_thread = running;
 
+	DEBUG("Starting csignal | V(s)");
 	sem->count++;
 	if (sem->count <= 0) {
 
-		DEBUG("Semaphore has items");
-
+		DEBUG("Getting next thread from semaphoreQueue");
 		nextThread = NextFila2(sem->fila);
 
 		if (nextThread == NULL)
 		{
-			DEBUG("No thread in queue");
+			DEBUG("No thread in semaphoreQueue");
 		} else {
-			DEBUG("Got next");
+			DEBUG("Got next thread from semaphoreQueue");
 			//WAKE THREAD UP (nextThread)
 		}
 
 	}
-
 	return -9;
 }
 
