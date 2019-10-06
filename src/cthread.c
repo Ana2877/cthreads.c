@@ -167,20 +167,20 @@ int csem_init(csem_t *sem, int count)
 		initialize_cthread();
 
 	DEBUG("Starting semaphoreQueue pointer");
-	sFila2 *semaphoreQueue = NULL;
+	FILA2 *semaphoreQueue = NULL;
 
 	DEBUG("Trying to create semaphoreQueue");
 	int makeQueue = CreateFila2(semaphoreQueue);
 	if (makeQueue != 0){
 		ERROR("Could not create semaphoreQueue");
-		return -9
+		return -9;
 	}
 
 	DEBUG("Starting sem_count and sem_fila");
 	sem->count = count;
 	sem->fila = semaphoreQueue;
 
-	return 0
+	return 0;
 }
 
 int cwait(csem_t *sem)
@@ -196,13 +196,13 @@ int cwait(csem_t *sem)
 
 	DEBUG("Starting cwait | P(s)");
 	sem->count--;
-	if (sem->count) < 0 {
+	if (sem->count < 0) {
 
 		DEBUG("Inserting thread in semaphoreQueue");
 		int queueAppended = AppendFila2(sem->fila, current_thread);
 		if (queueAppended != 0){
 			ERROR("No thread in queue");
-			return -9
+			return -9;
 		}
 
 		DEBUG("Thread inserted in queue");
