@@ -8,8 +8,9 @@ csem_t mutex;
 
 void *return_void_star()
 {
+    printf("Thread1 tryng to enter in critial session\n");
     cwait(&mutex);
-    printf("WAITEI\n");
+    printf("Thread1 entered in critical session\n");
     int x = 0;
     while (x<1000000000) {
       x++;
@@ -19,33 +20,34 @@ void *return_void_star()
     while (x<1000000000) {
       x++;
     }
-    x = 0;
-    printf("SOLTEI O CU PRA RUUUDA TUDO\n");
+    printf("Thread1 finishing critical session\n");
     csignal(&mutex);
+    printf("Thread1 leave critical session\n");
     return NULL;
 }
 
 int return_int()
 {
   int x = 0;
-  printf("VO TENTA RUUDA TUDO\n");
+  printf("Thread2 tryng to enter in critial session\n");
   cwait(&mutex);
+  printf("Thread2 entered in critical session\n");
   while (x<1000000000) {
     x++;
   }
-  printf("SÓ PRINTO DEPOIS CPX\n");
+  printf("Thread2 finishing critical session\n");
   csignal(&mutex);
+  printf("Thread2 leave critical session\n");
   return 0;
 }
 
 int main()
 {
     csem_init(&mutex, 1);
-    int primeira = ccreate(&return_void_star, NULL, 0);
-    int segunda = ccreate((void *)&return_int, NULL, 0);
+    int thread1 = ccreate(&return_void_star, NULL, 0);
+    int thread2 = ccreate((void *)&return_int, NULL, 0);
 
-    printf("Waiting for primeira e segunda (%d %d)\n", primeira, segunda);
-    cjoin(primeira);
-    cjoin(segunda);
+    cjoin(thread1);
+    cjoin(thread2);
     return 0;
 }

@@ -163,18 +163,17 @@ int cjoin(int tid)
 
 int csem_init(csem_t *sem, int count)
 {
-	printf("Reached csem_init\n");
 	/* Initialize cthread library if not initialized yet */
 	if (running == NULL)
 		initialize_cthread();
 
-	printf("csem_init Starting semaphoreQueue pointer\n");
+	DEBUG("csem_init Starting semaphoreQueue pointer\n");
 	PriorityQueue *semaphoreQueue = NULL;
 
-	printf("csem_init Trying to create semaphoreQueue\n");
+	DEBUG("csem_init Trying to create semaphoreQueue\n");
 	semaphoreQueue = createPriorityQueue();
 
-	printf("csem_init Starting sem_count and sem_fila\n");
+	DEBUG("csem_init Starting sem_count and sem_fila\n");
 	sem->count = count;
 	sem->fila = semaphoreQueue;
 
@@ -183,31 +182,30 @@ int csem_init(csem_t *sem, int count)
 
 int cwait(csem_t *sem)
 {
-	printf("Reached cwait\n");
 	/* Initialize cthread library if not initialized yet */
 	if (running == NULL)
 		initialize_cthread();
 
-	printf("Assigining current_thread to running thread\n");
+	DEBUG("Assigining current_thread to running thread\n");
 	TCB_t *current_thread;
 	current_thread = running;
 
-	printf("Starting cwait | P(s)\n");
+	DEBUG("Starting cwait | P(s)\n");
 	sem->count--;
 	if (sem->count < 0) {
 
-		printf("Sleeping current_thread\n");
+		DEBUG("Sleeping current_thread\n");
 		current_thread->state = PROCST_BLOQ;
 		current_thread->prio = stopTimer();
 
-		printf("Inserting thread in semaphoreQueue\n");
+		DEBUG("Inserting thread in semaphoreQueue\n");
 		insertPriorityQueue(sem->fila, current_thread);
-		printf("Thread inserted in queue\n");
+		DEBUG("Thread inserted in queue\n");
 
 		running = NULL;
 
 		/* Swap context to the scheduler decide who runs */
-		printf("Swapping context to scheduler\n");
+		DEBUG("Swapping context to scheduler\n");
 		swapcontext(&(current_thread->context), scheduler_context);
 
 
@@ -217,35 +215,34 @@ int cwait(csem_t *sem)
 
 int csignal(csem_t *sem)
 {
-	printf("Reached csignal\n");
 	/* Initialize cthread library if not initialized yet */
 	if (running == NULL)
 		initialize_cthread();
 
-	printf("Assigining current_thread and creating nextThread pointers\n");
+	DEBUG("Assigining current_thread and creating nextThread pointers\n");
 	TCB_t *current_thread, *nextThread = NULL;
 	current_thread = running;
 
-	printf("Starting csignal | V(s)\n");
+	DEBUG("Starting csignal | V(s)\n");
 	sem->count++;
 	if (sem->count <= 0) {
 
-		printf("Getting next thread from semaphoreQueue\n");
+		DEBUG("Getting next thread from semaphoreQueue\n");
 		nextThread = frontPriorityQueue(sem->fila);
 
 		if (nextThread == NULL)
 		{
-			printf("No thread in semaphoreQueue\n");
+			DEBUG("No thread in semaphoreQueue\n");
 
 		} else {
-			printf("Popped from semaphoreQueue\n");
+			DEBUG("Popped from semaphoreQueue\n");
 			popPriorityQueue(sem->fila);
 
-			printf("Changed state of next thread\n");
+			DEBUG("Changed state of next thread\n");
 			nextThread->state = PROCST_APTO;
 			insertPriorityQueue(ready, (void *)nextThread);
 
-			printf("Finished csignal\n");
+			DEBUG("Finished csignal\n");
 		}
 	}
 	return -9;
