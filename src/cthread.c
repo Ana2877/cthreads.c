@@ -161,27 +161,74 @@ int cjoin(int tid)
 
 int csem_init(csem_t *sem, int count)
 {
+	DEBUG("Reached csem_init");
 	/* Initialize cthread library if not initialized yet */
 	if (running == NULL)
 		initialize_cthread();
 
-	return -9;
+	DEBUG("Starting sem_queue");
+
+	PriorityQueue *semaphoreQueue = NULL;
+	semaphoreQueue = createPriorityQueue();
+
+	DEBUG("Starting sem_count and sem_fila");
+
+	sem->count = count;
+	sem->fila = semaphoreQueue;
+
+	return 0
 }
 
 int cwait(csem_t *sem)
 {
+	DEBUG("Reached cwait");
 	/* Initialize cthread library if not initialized yet */
 	if (running == NULL)
 		initialize_cthread();
 
+		DEBUG("Starting cwait | P(s)");
+
+		sem->count--;
+		if (sem->count) < 0 {
+
+			DEBUG("Entering inserting section");
+
+			insertPriorityQueue(semaphoreQueue, current_thread);
+
+			DEBUG("Thread inserted in queue");
+
+			//SLEEP THREAD
+		}
 	return -9;
 }
 
 int csignal(csem_t *sem)
 {
+	DEBUG("Reached csignal");
 	/* Initialize cthread library if not initialized yet */
 	if (running == NULL)
 		initialize_cthread();
+
+
+		TCB_t *nextThread;
+
+		sem->count++;
+		if (sem->count <= 0) {
+
+			DEBUG("Semaphore has items");
+
+			nextThread = frontPriorityQueue(semaphoreQueue);
+			if (scheduled == NULL)
+			{
+				ERROR("No thread in queue");
+				return -9
+			}
+
+			popPriorityQueue(semaphoreQueue);
+			DEBUG("Queue popped");
+
+			//WAKE THREAD UP
+		}
 
 	return -9;
 }
