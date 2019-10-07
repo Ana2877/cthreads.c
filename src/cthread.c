@@ -47,7 +47,7 @@ int ccreate(void *(*start)(void *), void *arg, int prio)
 	/* Allocate new thread TCB */
 	new_thread = (TCB_t *)malloc(sizeof(TCB_t));
 	new_thread->state = PROCST_APTO;
-	new_thread->prio = 0;
+	new_thread->prio = prio;
 	new_thread->tid = global_tid++;
 	DEBUG("Created new thread with TID %d", new_thread->tid);
 
