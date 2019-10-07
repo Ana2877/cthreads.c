@@ -185,7 +185,8 @@ int cwait(csem_t *sem)
 
 	DEBUG("Starting cwait | P(s)\n");
 	sem->count--;
-	if (sem->count < 0) {
+	if (sem->count < 0)
+	{
 
 		DEBUG("Sleeping current_thread\n");
 		current_thread->state = PROCST_BLOQ;
@@ -200,9 +201,8 @@ int cwait(csem_t *sem)
 		/* Swap context to the scheduler decide who runs */
 		DEBUG("Swapping context to scheduler\n");
 		swapcontext(&(current_thread->context), scheduler_context);
-
-
 	}
+
 	return 0;
 }
 
@@ -216,16 +216,18 @@ int csignal(csem_t *sem)
 
 	DEBUG("Starting csignal | V(s)\n");
 	sem->count++;
-	if (sem->count <= 0) {
+	if (sem->count <= 0)
+	{
 
 		DEBUG("Getting next thread from semaphore_queue\n");
 		next_thread = frontPriorityQueue(sem->fila);
 
 		if (next_thread == NULL)
 		{
-			DEBUG("No thread in semaphore_queue\n");
-
-		} else {
+			ERROR("No thread in semaphore_queue\n");
+		}
+		else
+		{
 			DEBUG("Popped from semaphore_queue\n");
 			popPriorityQueue(sem->fila);
 
@@ -236,6 +238,7 @@ int csignal(csem_t *sem)
 			DEBUG("Finished csignal\n");
 		}
 	}
+
 	return 0;
 }
 
