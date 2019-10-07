@@ -38,7 +38,7 @@ void wakeUp(int);
 
 int ccreate(void *(*start)(void *), void *arg, int prio)
 {
-	TCB_t *new_thread;
+	TCB_t *new_thread = NULL;
 
 	/* Initialize cthread library if not initialized yet */
 	if (running == NULL)
@@ -86,16 +86,12 @@ int cyield(void)
 	current_thread = running;
 	current_thread->state = PROCST_APTO;
 	current_thread->prio = stopTimer(); /* Time since started running */
-	DEBUG("Moving current running thread with tid %d to ready", current_thread->tid);
 
+	DEBUG("Moving current running thread with tid %d to ready", current_thread->tid);
 	insertPriorityQueue(ready, current_thread);
 
 	/* Remove current running thread */
 	running = NULL;
-
-	/* Restart timer for next thread */
-	DEBUG("Restarting timer for next thread");
-	startTimer();
 
 	/* Swap context to the scheduler decide who runs */
 	DEBUG("Swapping context to scheduler");
@@ -150,9 +146,6 @@ int cjoin(int tid)
 
 	/* Remove current running thread */
 	running = NULL;
-
-	/* Restart timer for next thread */
-	startTimer();
 
 	/* Swap context to the scheduler decide who runs */
 	DEBUG("Swapping context to scheduler");
@@ -294,7 +287,7 @@ void scheduler()
 {
 	TCB_t *scheduled;
 
-	DEBUG("Reached scheduler");
+	DEBUG("Running scheduler");
 
 	/* If running is not null, this means the thread it was there just finished */
 	if (running != NULL)
@@ -329,6 +322,10 @@ void scheduler()
 
 	/* Update running */
 	running = scheduled;
+
+	/* Start running priority timer */
+	DEBUG("Starting timer");
+	startTimer();
 
 	/* Change context to the scheduled thread */
 	DEBUG("Starting to run scheduled thread tid %d", running->tid);
