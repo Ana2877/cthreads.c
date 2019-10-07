@@ -210,7 +210,7 @@ int cwait(csem_t *sem)
 
 
 	}
-	return -9;
+	return 0;
 }
 
 int csignal(csem_t *sem)
@@ -245,7 +245,7 @@ int csignal(csem_t *sem)
 			DEBUG("Finished csignal\n");
 		}
 	}
-	return -9;
+	return 0;
 }
 
 int cidentify(char *name, int size)
