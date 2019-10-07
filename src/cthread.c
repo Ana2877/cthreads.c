@@ -8,7 +8,7 @@
 
 /* Configure default values */
 #define FIRST_TID 0
-#define STACK_SIZE (2 << 16)
+#define STACK_SIZE (2 << 20) /* Each stack has 1MB of memory */
 
 #define DEBUG_ENABLED
 #ifdef DEBUG_ENABLED
@@ -38,7 +38,7 @@ void wakeUp(int);
 
 int ccreate(void *(*start)(void *), void *arg, int prio)
 {
-	TCB_t *new_thread;
+	TCB_t *new_thread = NULL;
 
 	/* Initialize cthread library if not initialized yet */
 	if (running == NULL)
@@ -47,7 +47,7 @@ int ccreate(void *(*start)(void *), void *arg, int prio)
 	/* Allocate new thread TCB */
 	new_thread = (TCB_t *)malloc(sizeof(TCB_t));
 	new_thread->state = PROCST_APTO;
-	new_thread->prio = 0;
+	new_thread->prio = prio;
 	new_thread->tid = global_tid++;
 	DEBUG("Created new thread with TID %d", new_thread->tid);
 
@@ -76,7 +76,7 @@ int ccreate(void *(*start)(void *), void *arg, int prio)
 
 int cyield(void)
 {
-	TCB_t *current_thread;
+	TCB_t *current_thread = NULL;
 
 	/* Initialize cthread library if not initialized yet */
 	if (running == NULL)
@@ -86,14 +86,12 @@ int cyield(void)
 	current_thread = running;
 	current_thread->state = PROCST_APTO;
 	current_thread->prio = stopTimer(); /* Time since started running */
+
 	DEBUG("Moving current running thread with tid %d to ready", current_thread->tid);
+	insertPriorityQueue(ready, current_thread);
 
 	/* Remove current running thread */
 	running = NULL;
-
-	/* Restart timer for next thread */
-	DEBUG("Restarting timer for next thread");
-	startTimer();
 
 	/* Swap context to the scheduler decide who runs */
 	DEBUG("Swapping context to scheduler");
@@ -104,7 +102,7 @@ int cyield(void)
 
 int cjoin(int tid)
 {
-	TCB_t *joined_thread, *current_thread;
+	TCB_t *joined_thread = NULL, *current_thread = NULL;
 
 	/* Initialize cthread library if not initialized yet */
 	if (running == NULL)
@@ -149,9 +147,6 @@ int cjoin(int tid)
 	/* Remove current running thread */
 	running = NULL;
 
-	/* Restart timer for next thread */
-	startTimer();
-
 	/* Swap context to the scheduler decide who runs */
 	DEBUG("Swapping context to scheduler");
 	swapcontext(&(current_thread->context), scheduler_context);
@@ -161,29 +156,90 @@ int cjoin(int tid)
 
 int csem_init(csem_t *sem, int count)
 {
+	PriorityQueue *semaphore_queue = NULL;
+
 	/* Initialize cthread library if not initialized yet */
 	if (running == NULL)
 		initialize_cthread();
 
-	return -9;
+	DEBUG("Create semaphore_queue\n");
+	semaphore_queue = createPriorityQueue();
+
+	DEBUG("Starting sem_count and sem_fila\n");
+	sem->count = count;
+	sem->fila = semaphore_queue;
+
+	return 0;
 }
 
 int cwait(csem_t *sem)
 {
+	TCB_t *current_thread = NULL;
+
 	/* Initialize cthread library if not initialized yet */
 	if (running == NULL)
 		initialize_cthread();
 
-	return -9;
+	DEBUG("Fetching running thread\n");
+	current_thread = running;
+
+	DEBUG("Starting cwait | P(s)\n");
+	sem->count--;
+	if (sem->count < 0)
+	{
+
+		DEBUG("Sleeping current_thread\n");
+		current_thread->state = PROCST_BLOQ;
+		current_thread->prio = stopTimer();
+
+		DEBUG("Inserting thread in semaphoreQueue\n");
+		insertPriorityQueue(sem->fila, current_thread);
+		DEBUG("Thread inserted in queue\n");
+
+		running = NULL;
+
+		/* Swap context to the scheduler decide who runs */
+		DEBUG("Swapping context to scheduler\n");
+		swapcontext(&(current_thread->context), scheduler_context);
+	}
+
+	return 0;
 }
 
 int csignal(csem_t *sem)
 {
+	TCB_t *next_thread = NULL;
+
 	/* Initialize cthread library if not initialized yet */
 	if (running == NULL)
 		initialize_cthread();
 
-	return -9;
+	DEBUG("Starting csignal | V(s)\n");
+	sem->count++;
+	if (sem->count <= 0)
+	{
+
+		DEBUG("Getting next thread from semaphore_queue\n");
+		next_thread = frontPriorityQueue(sem->fila);
+
+		if (next_thread == NULL)
+		{
+			ERROR("No thread in semaphore_queue\n");
+		}
+		else
+		{
+			DEBUG("Popped from semaphore_queue\n");
+			popPriorityQueue(sem->fila);
+
+			DEBUG("Changed state of next thread\n");
+			next_thread->state = PROCST_APTO;
+			insertPriorityQueue(ready, (void *)next_thread);
+
+			DEBUG("Finished csignal\n");
+		}
+	}
+
+	return 0;
 }
 
 int cidentify(char *name, int size)
@@ -234,7 +290,7 @@ void scheduler()
 {
 	TCB_t *scheduled;
 
-	DEBUG("Reached scheduler");
+	DEBUG("Running scheduler");
 
 	/* If running is not null, this means the thread it was there just finished */
 	if (running != NULL)
@@ -269,6 +325,10 @@ void scheduler()
 
 	/* Update running */
 	running = scheduled;
+
+	/* Start running priority timer */
+	DEBUG("Starting timer");
+	startTimer();
 
 	/* Change context to the scheduled thread */
 	DEBUG("Starting to run scheduled thread tid %d", running->tid);
