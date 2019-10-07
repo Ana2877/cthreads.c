@@ -8,7 +8,7 @@
 
 /* Configure default values */
 #define FIRST_TID 0
-#define STACK_SIZE (2 << 16)
+#define STACK_SIZE (2 << 20) /* Each stack has 1MB of memory */
 
 #define DEBUG_ENABLED
 #ifdef DEBUG_ENABLED
