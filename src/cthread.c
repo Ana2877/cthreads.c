@@ -76,7 +76,7 @@ int ccreate(void *(*start)(void *), void *arg, int prio)
 
 int cyield(void)
 {
-	TCB_t *current_thread;
+	TCB_t *current_thread = NULL;
 
 	/* Initialize cthread library if not initialized yet */
 	if (running == NULL)
@@ -106,7 +106,7 @@ int cyield(void)
 
 int cjoin(int tid)
 {
-	TCB_t *joined_thread, *current_thread;
+	TCB_t *joined_thread = NULL, *current_thread = NULL;
 
 	/* Initialize cthread library if not initialized yet */
 	if (running == NULL)
@@ -163,17 +163,16 @@ int cjoin(int tid)
 
 int csem_init(csem_t *sem, int count)
 {
+	PriorityQueue *semaphore_queue = NULL;
+
 	/* Initialize cthread library if not initialized yet */
 	if (running == NULL)
 		initialize_cthread();
 
-	DEBUG("csem_init starting semaphore_queue pointer\n");
-	PriorityQueue *semaphore_queue = NULL;
-
-	DEBUG("csem_init trying to create semaphore_queue\n");
+	DEBUG("Create semaphore_queue\n");
 	semaphore_queue = createPriorityQueue();
 
-	DEBUG("csem_init starting sem_count and sem_fila\n");
+	DEBUG("Starting sem_count and sem_fila\n");
 	sem->count = count;
 	sem->fila = semaphore_queue;
 
@@ -182,12 +181,13 @@ int csem_init(csem_t *sem, int count)
 
 int cwait(csem_t *sem)
 {
+	TCB_t *current_thread = NULL;
+
 	/* Initialize cthread library if not initialized yet */
 	if (running == NULL)
 		initialize_cthread();
 
-	DEBUG("Assigining current_thread to running thread\n");
-	TCB_t *current_thread;
+	DEBUG("Fetching running thread\n");
 	current_thread = running;
 
 	DEBUG("Starting cwait | P(s)\n");
@@ -215,13 +215,11 @@ int cwait(csem_t *sem)
 
 int csignal(csem_t *sem)
 {
+	TCB_t *next_thread = NULL;
+
 	/* Initialize cthread library if not initialized yet */
 	if (running == NULL)
 		initialize_cthread();
-
-	DEBUG("Assigining current_thread and creating next_thread pointers\n");
-	TCB_t *current_thread, *next_thread = NULL;
-	current_thread = running;
 
 	DEBUG("Starting csignal | V(s)\n");
 	sem->count++;
