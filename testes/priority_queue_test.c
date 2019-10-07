@@ -39,7 +39,7 @@ int main()
     popPriorityQueue(pq);
     popPriorityQueue(pq);
     returned = (TCB_t *)frontPriorityQueue(pq);
-    printf("%p == (nil)", returned);
+    printf("%p == (nil)\n", returned);
 
     return 0;
 }
