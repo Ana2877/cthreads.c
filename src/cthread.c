@@ -167,15 +167,15 @@ int csem_init(csem_t *sem, int count)
 	if (running == NULL)
 		initialize_cthread();
 
-	DEBUG("csem_init Starting semaphoreQueue pointer\n");
-	PriorityQueue *semaphoreQueue = NULL;
+	DEBUG("csem_init starting semaphore_queue pointer\n");
+	PriorityQueue *semaphore_queue = NULL;
 
-	DEBUG("csem_init Trying to create semaphoreQueue\n");
-	semaphoreQueue = createPriorityQueue();
+	DEBUG("csem_init trying to create semaphore_queue\n");
+	semaphore_queue = createPriorityQueue();
 
-	DEBUG("csem_init Starting sem_count and sem_fila\n");
+	DEBUG("csem_init starting sem_count and sem_fila\n");
 	sem->count = count;
-	sem->fila = semaphoreQueue;
+	sem->fila = semaphore_queue;
 
 	return 0;
 }
@@ -219,28 +219,28 @@ int csignal(csem_t *sem)
 	if (running == NULL)
 		initialize_cthread();
 
-	DEBUG("Assigining current_thread and creating nextThread pointers\n");
-	TCB_t *current_thread, *nextThread = NULL;
+	DEBUG("Assigining current_thread and creating next_thread pointers\n");
+	TCB_t *current_thread, *next_thread = NULL;
 	current_thread = running;
 
 	DEBUG("Starting csignal | V(s)\n");
 	sem->count++;
 	if (sem->count <= 0) {
 
-		DEBUG("Getting next thread from semaphoreQueue\n");
-		nextThread = frontPriorityQueue(sem->fila);
+		DEBUG("Getting next thread from semaphore_queue\n");
+		next_thread = frontPriorityQueue(sem->fila);
 
-		if (nextThread == NULL)
+		if (next_thread == NULL)
 		{
-			DEBUG("No thread in semaphoreQueue\n");
+			DEBUG("No thread in semaphore_queue\n");
 
 		} else {
-			DEBUG("Popped from semaphoreQueue\n");
+			DEBUG("Popped from semaphore_queue\n");
 			popPriorityQueue(sem->fila);
 
 			DEBUG("Changed state of next thread\n");
-			nextThread->state = PROCST_APTO;
-			insertPriorityQueue(ready, (void *)nextThread);
+			next_thread->state = PROCST_APTO;
+			insertPriorityQueue(ready, (void *)next_thread);
 
 			DEBUG("Finished csignal\n");
 		}
