@@ -258,18 +258,21 @@ int cidentify(char *name, int size)
    main and PriorityQueues for ready and blocked */
 void initialize_cthread()
 {
+	/* Configure logs */
+	CREATE_LOG_FILE;
+
+	/* Create main function TCB_t and configure it */
 	TCB_t *main_TCB = (TCB_t *)malloc(sizeof(TCB_t));
 	main_TCB->state = PROCST_EXEC;
 	main_TCB->prio = 0;
 	main_TCB->tid = global_tid++;
+	DEBUG("Created main thread with TID %d", main_TCB->tid);
 
 	/* Configure the global variables */
 	running = main_TCB;
 	ready = createPriorityQueue();
 	blocked = createPriorityQueue();
-	CREATE_DEBUG_FILE;
 	DEBUG("Configured global variables");
-	DEBUG("Created main thread with TID %d", main_TCB->tid); /* Need to debug down here because the debug file is not yet open before of this line */
 
 	/* Configure scheduler_context (with utc_link pointing to itself - infinite loop) */
 	scheduler_context = (ucontext_t *)malloc(sizeof(ucontext_t));
