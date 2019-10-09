@@ -23,4 +23,4 @@ csemaphore: csemaphore_test.c
 	$(CC) -o csemaphore_test csemaphore_test.c -Wall -L$(LIB_DIR) -lcthread -Wall
 
 clean:
-	rm -rf csemaphore_test priority_queue_test ccreate_test cyield_test cjoin_test *.o *~
+	rm -rf csemaphore_test priority_queue_test ccreate_test cyield_test cjoin_test *.log *.o *~
