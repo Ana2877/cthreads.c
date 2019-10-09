@@ -35,7 +35,7 @@ void popPriorityQueue(PriorityQueue *pq)
 void insertPriorityQueue(PriorityQueue *pq, void *content)
 {
     TCB_t *current_node = (TCB_t *)content;
-    
+
     /* If pq is empty, we append it to the end */
     if (FirstFila2(pq) != 0)
     {
@@ -50,7 +50,7 @@ void insertPriorityQueue(PriorityQueue *pq, void *content)
 
         /* We will use a descending priority order, where the lower
            the value, the higher the node priority */
-        if (node->prio <= current_node->prio)
+        if ((unsigned int)node->prio <= (unsigned int)current_node->prio)
             NextFila2((PFILA2)pq);
         else
             break;
