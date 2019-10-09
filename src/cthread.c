@@ -10,15 +10,15 @@
 #define FIRST_TID 0
 #define STACK_SIZE (2 << 20) /* Each stack has 1MB of memory */
 
-#define DEBUG_ENABLED
-#ifdef DEBUG_ENABLED
+#define LOG_ENABLED /* Comment/Uncomment to Disable/Enable log file */
+#ifdef LOG_ENABLED
 #define DEBUG(s_, ...) fprintf(cthread_file, "[DEBUG] " s_ "\n", ##__VA_ARGS__)
 #define ERROR(s_, ...) fprintf(cthread_file, "[ERROR] " s_ "\n", ##__VA_ARGS__)
-#define CREATE_DEBUG_FILE (cthread_file = fopen("./cthread.log", "a"))
+#define CREATE_LOG_FILE (cthread_file = fopen("./cthread.log", "a"))
 #else
 #define DEBUG(s_, ...)
 #define ERROR(s_, ...)
-#define CREATE_DEBUG_FILE
+#define CREATE_LOG_FILE
 #endif
 
 /* Configure global variables */
@@ -32,7 +32,7 @@ int global_tid = FIRST_TID;
 FILE *cthread_file;
 
 /* Prototypes to auxiliar functions */
-void initialize_cthread();
+int initialize_cthread();
 void scheduler();
 void wakeUp(int);
 
@@ -41,8 +41,11 @@ int ccreate(void *(*start)(void *), void *arg, int prio)
 	TCB_t *new_thread = NULL;
 
 	/* Initialize cthread library if not initialized yet */
-	if (running == NULL)
-		initialize_cthread();
+	if (running == NULL && initialize_cthread() != 0)
+	{
+		ERROR("Couldn't initialize cthread");
+		return -1;
+	}
 
 	/* Allocate new thread TCB */
 	new_thread = (TCB_t *)malloc(sizeof(TCB_t));
@@ -79,8 +82,11 @@ int cyield(void)
 	TCB_t *current_thread = NULL;
 
 	/* Initialize cthread library if not initialized yet */
-	if (running == NULL)
-		initialize_cthread();
+	if (running == NULL && initialize_cthread() != 0)
+	{
+		ERROR("Couldn't initialize cthread");
+		return -1;
+	}
 
 	/* Update current_thread status to ready */
 	current_thread = running;
@@ -95,7 +101,11 @@ int cyield(void)
 
 	/* Swap context to the scheduler decide who runs */
 	DEBUG("Swapping context to scheduler");
-	swapcontext(&(current_thread->context), scheduler_context);
+	if (swapcontext(&(current_thread->context), scheduler_context) == -1)
+	{
+		ERROR("Couldn't swap context");
+		return -1;
+	}
 
 	return 0;
 }
@@ -105,8 +115,11 @@ int cjoin(int tid)
 	TCB_t *joined_thread = NULL, *current_thread = NULL;
 
 	/* Initialize cthread library if not initialized yet */
-	if (running == NULL)
-		initialize_cthread();
+	if (running == NULL && initialize_cthread() != 0)
+	{
+		ERROR("Couldn't initialize cthread");
+		return -1;
+	}
 
 	/* Find the thread we want to join */
 	DEBUG("Finding thread to join");
@@ -149,7 +162,11 @@ int cjoin(int tid)
 
 	/* Swap context to the scheduler decide who runs */
 	DEBUG("Swapping context to scheduler");
-	swapcontext(&(current_thread->context), scheduler_context);
+	if (swapcontext(&(current_thread->context), scheduler_context) == -1)
+	{
+		ERROR("Couldn't swap context");
+		return -1;
+	}
 
 	return 0;
 }
@@ -159,8 +176,11 @@ int csem_init(csem_t *sem, int count)
 	PriorityQueue *semaphore_queue = NULL;
 
 	/* Initialize cthread library if not initialized yet */
-	if (running == NULL)
-		initialize_cthread();
+	if (running == NULL && initialize_cthread() != 0)
+	{
+		ERROR("Couldn't initialize cthread");
+		return -1;
+	}
 
 	DEBUG("Create semaphore_queue\n");
 	semaphore_queue = createPriorityQueue();
@@ -177,8 +197,11 @@ int cwait(csem_t *sem)
 	TCB_t *current_thread = NULL;
 
 	/* Initialize cthread library if not initialized yet */
-	if (running == NULL)
-		initialize_cthread();
+	if (running == NULL && initialize_cthread() != 0)
+	{
+		ERROR("Couldn't initialize cthread");
+		return -1;
+	}
 
 	DEBUG("Fetching running thread\n");
 	current_thread = running;
@@ -199,8 +222,12 @@ int cwait(csem_t *sem)
 		running = NULL;
 
 		/* Swap context to the scheduler decide who runs */
-		DEBUG("Swapping context to scheduler\n");
-		swapcontext(&(current_thread->context), scheduler_context);
+		DEBUG("Swapping context to scheduler");
+		if (swapcontext(&(current_thread->context), scheduler_context) == -1)
+		{
+			ERROR("Couldn't swap context");
+			return -1;
+		}
 	}
 
 	return 0;
@@ -211,8 +238,11 @@ int csignal(csem_t *sem)
 	TCB_t *next_thread = NULL;
 
 	/* Initialize cthread library if not initialized yet */
-	if (running == NULL)
-		initialize_cthread();
+	if (running == NULL && initialize_cthread() != 0)
+	{
+		ERROR("Couldn't initialize cthread");
+		return -1;
+	}
 
 	DEBUG("Starting csignal | V(s)\n");
 	sem->count++;
@@ -245,8 +275,11 @@ int csignal(csem_t *sem)
 int cidentify(char *name, int size)
 {
 	/* Initialize cthread library if not initialized yet */
-	if (running == NULL)
-		initialize_cthread();
+	if (running == NULL && initialize_cthread() != 0)
+	{
+		ERROR("Couldn't initialize cthread");
+		return -1;
+	}
 
 	strncpy(name, "Ana Carolina Pagnoncelli - 00287714\nAugusto Zanella Bardini  - 00278083\nRafael Baldasso Audibert - 00287695", size);
 	return 0;
