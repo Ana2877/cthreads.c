@@ -182,10 +182,10 @@ int csem_init(csem_t *sem, int count)
 		return -1;
 	}
 
-	DEBUG("Create semaphore_queue\n");
+	DEBUG("Create semaphore_queue");
 	semaphore_queue = createPriorityQueue();
 
-	DEBUG("Starting sem_count and sem_fila\n");
+	DEBUG("Starting sem_count and sem_fila");
 	sem->count = count;
 	sem->fila = semaphore_queue;
 
@@ -203,21 +203,21 @@ int cwait(csem_t *sem)
 		return -1;
 	}
 
-	DEBUG("Fetching running thread\n");
+	DEBUG("Fetching running thread");
 	current_thread = running;
 
-	DEBUG("Starting cwait | P(s)\n");
+	DEBUG("Starting cwait | P(s)");
 	sem->count--;
 	if (sem->count < 0)
 	{
 
-		DEBUG("Sleeping current_thread\n");
+		DEBUG("Sleeping current_thread");
 		current_thread->state = PROCST_BLOQ;
 		current_thread->prio = stopTimer();
 
-		DEBUG("Inserting thread in semaphoreQueue\n");
+		DEBUG("Inserting thread in semaphoreQueue");
 		insertPriorityQueue(sem->fila, current_thread);
-		DEBUG("Thread inserted in queue\n");
+		DEBUG("Thread inserted in queue");
 
 		running = NULL;
 
@@ -244,28 +244,28 @@ int csignal(csem_t *sem)
 		return -1;
 	}
 
-	DEBUG("Starting csignal | V(s)\n");
+	DEBUG("Starting csignal | V(s)");
 	sem->count++;
 	if (sem->count <= 0)
 	{
 
-		DEBUG("Getting next thread from semaphore_queue\n");
+		DEBUG("Getting next thread from semaphore_queue");
 		next_thread = frontPriorityQueue(sem->fila);
 
 		if (next_thread == NULL)
 		{
-			ERROR("No thread in semaphore_queue\n");
+			ERROR("No thread in semaphore_queue");
 		}
 		else
 		{
-			DEBUG("Popped from semaphore_queue\n");
+			DEBUG("Popped from semaphore_queue");
 			popPriorityQueue(sem->fila);
 
-			DEBUG("Changed state of next thread\n");
+			DEBUG("Changed state of next thread");
 			next_thread->state = PROCST_APTO;
 			insertPriorityQueue(ready, (void *)next_thread);
 
-			DEBUG("Finished csignal\n");
+			DEBUG("Finished csignal");
 		}
 	}
 
@@ -289,7 +289,7 @@ int cidentify(char *name, int size)
 
 /* First time running a cthread function, so need to create TCB for
    main and PriorityQueues for ready and blocked */
-void initialize_cthread()
+int initialize_cthread()
 {
 	/* Configure logs */
 	CREATE_LOG_FILE;
@@ -309,16 +309,25 @@ void initialize_cthread()
 
 	/* Configure scheduler_context (with utc_link pointing to itself - infinite loop) */
 	scheduler_context = (ucontext_t *)malloc(sizeof(ucontext_t));
-	getcontext(scheduler_context);
-	scheduler_context->uc_link = scheduler_context;
-	scheduler_context->uc_stack.ss_sp = malloc(STACK_SIZE);
-	scheduler_context->uc_stack.ss_size = STACK_SIZE;
-	scheduler_context->uc_stack.ss_flags = 0;
-	makecontext(scheduler_context, scheduler, 1, NULL);
-	DEBUG("Successfully configured scheduler context");
+	if (getcontext(scheduler_context) == 0)
+	{
+		scheduler_context->uc_link = scheduler_context;
+		scheduler_context->uc_stack.ss_sp = malloc(STACK_SIZE);
+		scheduler_context->uc_stack.ss_size = STACK_SIZE;
+		scheduler_context->uc_stack.ss_flags = 0;
+		makecontext(scheduler_context, scheduler, 1, NULL);
+		DEBUG("Successfully configured scheduler context");
+	}
+	else
+	{
+		ERROR("Couldn't get context for main thread");
+		return -1;
+	};
 
 	/* Start counting the time for the main thread */
 	startTimer();
+
+	return 0;
 }
 
 /* Scheduler */
@@ -368,7 +377,13 @@ void scheduler()
 
 	/* Change context to the scheduled thread */
 	DEBUG("Starting to run scheduled thread tid %d", running->tid);
-	setcontext(&(scheduled->context));
+
+	if (setcontext(&(scheduled->context)) == -1)
+	{
+		ERROR("Couldn't set context");
+		ERROR("Exiting with error code 1");
+		exit(1);
+	}
 }
 
 /* Remove the tid with this value from the blocked list, and add it to the ready one */
