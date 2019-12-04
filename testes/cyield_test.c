@@ -55,6 +55,23 @@ void *return_3()
   return NULL;
 }
 
+/*
+  Testa funcionamento do csempahore
+
+  Deve imprimir, em ordem:
+    Starting thread1
+    thread1 yield
+    Starting thread2
+    thread2 yield
+    thread3 started and finished
+    Finishing Thread2
+    thread2 finished
+    Finishing Thread1
+    thread1 finished
+
+  Função principal cria 3 threads. Damos join em sequencia nelas. Devemos rodar, em ordem,
+  thread1, depois thread2, depois thread3, por causa dos timeouts usados.
+*/
 int main()
 {
   int thread1 = ccreate(&return_1, NULL, 0);

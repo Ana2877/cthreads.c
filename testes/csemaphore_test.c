@@ -53,6 +53,22 @@ void *return_2()
   return 0;
 }
 
+/*
+  Testa funcionamento do csempahore
+
+  Deve imprimir, em ordem:
+    Thread1 trying to enter in critial session
+    Thread1 entered in critical session
+    Thread2 trying to enter in critial session
+    Thread1 finishing critical session
+    Thread1 left critical session
+    Thread2 entered in critical session
+    Thread2 finishing critical session
+    Thread2 left critical session
+
+  Faz thread 1 entrar na seção crítica, e dá yield para thread 2, que não consegue entrar.
+  Quando thread 1 liberar seção crítica, thread 2 consegue.
+*/
 int main()
 {
   csem_init(&mutex, 1);
