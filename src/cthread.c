@@ -52,6 +52,7 @@ int ccreate(void *(*start)(void *), void *arg, int prio)
 	new_thread->state = PROCST_APTO;
 	new_thread->prio = prio;
 	new_thread->tid = global_tid++;
+	new_thread->waited_by = NULL;
 	DEBUG("Created new thread with TID %d", new_thread->tid);
 
 	/* Initialize context of it */
@@ -299,6 +300,7 @@ int initialize_cthread()
 	main_TCB->state = PROCST_EXEC;
 	main_TCB->prio = 0;
 	main_TCB->tid = global_tid++;
+	main_TCB->waited_by = NULL;
 	DEBUG("Created main thread with TID %d", main_TCB->tid);
 
 	/* Configure the global variables */
